@@ -8,7 +8,7 @@ interface Utils {
 	/**
 	 * Returns immediate function code enum from code bytes at current position.
 	 * <p>
-	 * Initial position is <tt>codeByteBuffer.position()</tt> but on return is incremented by 2.
+	 * Initial position is <code>codeByteBuffer.position()</code> but on return is incremented by 2.
 	 * 
 	 * @param codeByteBuffer
 	 * @return FunctionCode
@@ -33,9 +33,9 @@ interface Utils {
 	/**
 	 * Returns code address from code bytes at current position.
 	 * <p>
-	 * Initial position is <tt>codeByteBuffer.position()</tt> but on return is incremented by 4.
+	 * Initial position is <code>codeByteBuffer.position()</code> but on return is incremented by 4.
 	 * <p>
-	 * <b>Note:</b> address is not scaled by <tt>Constants.VALUE_SIZE</tt> unlike other methods in this class.
+	 * <b>Note:</b> address is not scaled by <code>Constants.VALUE_SIZE</code> unlike other methods in this class.
 	 * 
 	 * @param codeByteBuffer
 	 * @return int address into code segment
@@ -58,9 +58,9 @@ interface Utils {
 	/**
 	 * Returns data address from code bytes at current position.
 	 * <p>
-	 * Initial position is <tt>codeByteBuffer.position()</tt> but on return is incremented by 4.
+	 * Initial position is <code>codeByteBuffer.position()</code> but on return is incremented by 4.
 	 * <p>
-	 * <b>Note:</b> address is returned scaled by <tt>Constants.VALUE_SIZE</tt>.
+	 * <b>Note:</b> address is returned scaled by <code>Constants.VALUE_SIZE</code>.
 	 * 
 	 * @param codeByteBuffer
 	 * @return int address into data segment
@@ -83,9 +83,9 @@ interface Utils {
 	/**
 	 * Returns byte offset from code bytes at current position.
 	 * <p>
-	 * Initial position is <tt>codeByteBuffer.position()</tt> but on return is incremented by 1.
+	 * Initial position is <code>codeByteBuffer.position()</code> but on return is incremented by 1.
 	 * <p>
-	 * <b>Note:</b> offset is not scaled by <tt>Constants.VALUE_SIZE</tt> unlike other methods in this class.
+	 * <b>Note:</b> offset is not scaled by <code>Constants.VALUE_SIZE</code> unlike other methods in this class.
 	 * 
 	 * @param codeByteBuffer
 	 * @return byte offset
@@ -103,7 +103,7 @@ interface Utils {
 	/**
 	 * Returns long immediate value from code bytes at current position.
 	 * <p>
-	 * Initial position is <tt>codeByteBuffer.position()</tt> but on return is incremented by 8.
+	 * Initial position is <code>codeByteBuffer.position()</code> but on return is incremented by 8.
 	 * 
 	 * @param codeByteBuffer
 	 * @return long value

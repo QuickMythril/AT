@@ -44,18 +44,29 @@ public class OpCodeTests extends ExecutableTest {
 
 	@Test
 	public void testSLP_DAT() throws ExecutionException {
-		int blockHeight = 12345;
+		int targetBlockHeight = api.getCurrentBlockHeight() + 5;
 
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).putLong(blockHeight);
-		codeByteBuffer.put(OpCode.SLP_DAT.value).putInt(0);
+		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(1).putLong(targetBlockHeight);
+		codeByteBuffer.put(OpCode.SLP_DAT.value).putInt(1);
 		codeByteBuffer.put(OpCode.FIN_IMD.value);
 
+		// one round only, to check AT has started sleeping
 		execute(true);
 
 		assertTrue(state.isSleeping());
 		assertFalse(state.isFinished());
 		assertFalse(state.hadFatalError());
-		assertEquals("Sleep-until block height incorrect", blockHeight, getData(0));
+		assertEquals("Sleep-until block height incorrect", targetBlockHeight, state.getSleepUntilHeight().intValue());
+
+		// continue sleeping until AT awakens
+		execute(false);
+
+		assertEquals("Reawaken block height incorrect", targetBlockHeight, state.getCurrentBlockHeight());
+
+		assertFalse(state.isSleeping());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
+		assertEquals("Sleep-until block height incorrect", null, state.getSleepUntilHeight());
 	}
 
 	@Test
@@ -187,6 +198,35 @@ public class OpCodeTests extends ExecutableTest {
 		assertTrue(state.isFinished());
 		assertFalse(state.hadFatalError());
 		assertEquals("Error flag not set", 1L, getData(2));
+	}
+
+	@Test
+	public void testSLP_VAL() throws ExecutionException {
+		int blockCount = 5;
+
+		int startingBlockHeight = api.getCurrentBlockHeight();
+		int targetBlockHeight = startingBlockHeight + blockCount;
+
+		codeByteBuffer.put(OpCode.SLP_VAL.value).putLong(blockCount);
+		codeByteBuffer.put(OpCode.FIN_IMD.value);
+
+		// one round only, to check AT has started sleeping
+		execute(true);
+
+		assertTrue(state.isSleeping());
+		assertFalse(state.isFinished());
+		assertFalse(state.hadFatalError());
+		assertEquals("Sleep-until block height incorrect", targetBlockHeight, state.getSleepUntilHeight().intValue());
+
+		// continue sleeping until AT awakens
+		execute(false);
+
+		assertEquals("Reawaken block height incorrect", targetBlockHeight, state.getCurrentBlockHeight());
+
+		assertFalse(state.isSleeping());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
+		assertEquals("Sleep-until block height incorrect", null, state.getSleepUntilHeight());
 	}
 
 	@Test

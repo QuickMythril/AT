@@ -4,16 +4,16 @@ package org.ciyam.at;
  * CIYAM-AT "Timestamp"
  * <p>
  * With CIYAM-ATs, "timestamp" does not mean a real timestamp but instead is an artificial timestamp that includes three parts:
- * <p>
+ * <p></p>
  * <ul>
  * <li>block height (32 bits)</li>
  * <li>blockchain ID (8 bits)</li>
  * <li>intra-block transaction sequence (24 bits)</li>
  * </ul>
  * This allows up to 256 different blockchains and up to ~16million transactions per block.
- * <p>
+ * <p></p>
  * A blockchain ID of zero is assumed to be the 'native' blockchain.
- * <p>
+ * <p></p>
  * Timestamp values are not directly manipulated by AT OpCodes so endianness isn't important here.
  * 
  * @see Timestamp#Timestamp(int, int, int)

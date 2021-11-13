@@ -146,4 +146,70 @@ public class ValueOpCodeTests extends ExecutableTest {
 		assertEquals("Error flag not set", 1L, getData(1));
 	}
 
+	@Test
+	public void testSHL_VAL() throws ExecutionException {
+		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(2).putLong(2222L);
+		codeByteBuffer.put(OpCode.SHL_VAL.value).putInt(2).putLong(3L);
+		codeByteBuffer.put(OpCode.FIN_IMD.value);
+
+		execute(true);
+
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
+		assertEquals("Data does not match", 2222L << 3, getData(2));
+	}
+
+	@Test
+	public void testSHL_VALexcess() throws ExecutionException {
+		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(2).putLong(2222L);
+		codeByteBuffer.put(OpCode.SHL_VAL.value).putInt(2).putLong(3333L);
+		codeByteBuffer.put(OpCode.FIN_IMD.value);
+
+		execute(true);
+
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
+		assertEquals("Data does not match", 0L, getData(2));
+	}
+
+	@Test
+	public void testSHR_VAL() throws ExecutionException {
+		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(2).putLong(2222L);
+		codeByteBuffer.put(OpCode.SHR_VAL.value).putInt(2).putLong(3L);
+		codeByteBuffer.put(OpCode.FIN_IMD.value);
+
+		execute(true);
+
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
+		assertEquals("Data does not match", 2222L >>> 3, getData(2));
+	}
+
+	@Test
+	public void testSHR_VALexcess() throws ExecutionException {
+		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(2).putLong(2222L);
+		codeByteBuffer.put(OpCode.SHR_VAL.value).putInt(2).putLong(3333L);
+		codeByteBuffer.put(OpCode.FIN_IMD.value);
+
+		execute(true);
+
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
+		assertEquals("Data does not match", 0L, getData(2));
+	}
+
+	@Test
+	public void testSHR_VALsign() throws ExecutionException {
+		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(2).putLong(-1L);
+		codeByteBuffer.put(OpCode.SHR_VAL.value).putInt(2).putLong(3L);
+		codeByteBuffer.put(OpCode.FIN_IMD.value);
+
+		execute(true);
+
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
+		assertEquals("Data does not match", -1L >>> 3, getData(2));
+		assertTrue("Sign does not match", getData(2) >= 0);
+	}
+
 }

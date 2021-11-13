@@ -12,19 +12,19 @@ import java.util.stream.Collectors;
  * <p>
  * Function codes are represented by a short. Functions can take 0 to 2 additional long values and optionally return a value too.
  * <p>
- * FunctionCode instances can be obtained via the default <tt>FunctionCode.valueOf(String)</tt> or the additional <tt>FunctionCode.valueOf(int)</tt>.
+ * FunctionCode instances can be obtained via the default <code>FunctionCode.valueOf(String)</code> or the additional <code>FunctionCode.valueOf(int)</code>.
  * <p>
- * Use the <tt>FunctionCode.execute</tt> method to perform the operation.
+ * Use the <code>FunctionCode.execute</code> method to perform the operation.
  * <p>
  * For more details, view the <a href="http://ciyam.org/at/at_api.html">API Specification</a>.
  * 
  * @see FunctionCode#valueOf(int)
- * @see FunctionCode#execute(FunctionData, MachineState)
+ * @see FunctionCode#execute(FunctionData, MachineState, short)
  */
 public enum FunctionCode {
 	/**
 	 * <b>ECHO</b> value to logger<br>
-	 * <tt>0x0001 value</tt>
+	 * <code>0x0001 value</code>
 	 */
 	ECHO(0x0001, 1, false) {
 		@Override
@@ -34,7 +34,7 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0100</tt><br>
+	 * <code>0x0100</code><br>
 	 * Returns A1 value
 	 */
 	GET_A1(0x0100, 0, true) {
@@ -44,7 +44,7 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0101</tt><br>
+	 * <code>0x0101</code><br>
 	 * Returns A2 value
 	 */
 	GET_A2(0x0101, 0, true) {
@@ -54,7 +54,7 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0102</tt><br>
+	 * <code>0x0102</code><br>
 	 * Returns A3 value
 	 */
 	GET_A3(0x0102, 0, true) {
@@ -64,7 +64,7 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0103</tt><br>
+	 * <code>0x0103</code><br>
 	 * Returns A4 value
 	 */
 	GET_A4(0x0103, 0, true) {
@@ -74,7 +74,7 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0104</tt><br>
+	 * <code>0x0104</code><br>
 	 * Returns B1 value
 	 */
 	GET_B1(0x0104, 0, true) {
@@ -84,7 +84,7 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0105</tt><br>
+	 * <code>0x0105</code><br>
 	 * Returns B2 value
 	 */
 	GET_B2(0x0105, 0, true) {
@@ -94,7 +94,7 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0106</tt><br>
+	 * <code>0x0106</code><br>
 	 * Returns B3 value
 	 */
 	GET_B3(0x0106, 0, true) {
@@ -104,7 +104,7 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0107</tt><br>
+	 * <code>0x0107</code><br>
 	 * Returns B4 value
 	 */
 	GET_B4(0x0107, 0, true) {
@@ -115,7 +115,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Copies A into addr to addr+3<br>
-	 * <tt>0x0108 addr</tt>
+	 * <code>0x0108 addr</code>
 	 */
 	GET_A_IND(0x0108, 1, false) {
 		@Override
@@ -133,7 +133,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Copies B into addr to addr+3<br>
-	 * <tt>0x0109 addr</tt>
+	 * <code>0x0109 addr</code>
 	 */
 	GET_B_IND(0x0109, 1, false) {
 		@Override
@@ -150,8 +150,46 @@ public enum FunctionCode {
 		}
 	},
 	/**
+	 * Copies A into addr to addr+3<br>
+	 * <code>0x010a addr</code><br>
+	 * To be used by calling EXT_FUN_VAL, passing destination address as <b>value</b>
+	 */
+	GET_A_DAT(0x010a, 1, false) {
+		@Override
+		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
+			// Validate data offset in arg1
+			checkDataAddress(state, functionData.value1, 4);
+
+			int dataIndex = (int) (functionData.value1 & Integer.MAX_VALUE);
+
+			state.dataByteBuffer.putLong(dataIndex++ * MachineState.VALUE_SIZE, state.a1);
+			state.dataByteBuffer.putLong(dataIndex++ * MachineState.VALUE_SIZE, state.a2);
+			state.dataByteBuffer.putLong(dataIndex++ * MachineState.VALUE_SIZE, state.a3);
+			state.dataByteBuffer.putLong(dataIndex++ * MachineState.VALUE_SIZE, state.a4);
+		}
+	},
+	/**
+	 * Copies B into addr to addr+3<br>
+	 * <code>0x010b addr</code><br>
+	 * To be used by calling EXT_FUN_VAL, passing destination address as <b>value</b>
+	 */
+	GET_B_DAT(0x010b, 1, false) {
+		@Override
+		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
+			// Validate data offset in arg1
+			checkDataAddress(state, functionData.value1, 4);
+
+			int dataIndex = (int) (functionData.value1 & Integer.MAX_VALUE);
+
+			state.dataByteBuffer.putLong(dataIndex++ * MachineState.VALUE_SIZE, state.b1);
+			state.dataByteBuffer.putLong(dataIndex++ * MachineState.VALUE_SIZE, state.b2);
+			state.dataByteBuffer.putLong(dataIndex++ * MachineState.VALUE_SIZE, state.b3);
+			state.dataByteBuffer.putLong(dataIndex++ * MachineState.VALUE_SIZE, state.b4);
+		}
+	},
+	/**
 	 * Set A1<br>
-	 * <tt>0x0110 value</tt>
+	 * <code>0x0110 value</code>
 	 */
 	SET_A1(0x0110, 1, false) {
 		@Override
@@ -161,7 +199,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Set A2<br>
-	 * <tt>0x0111 value</tt>
+	 * <code>0x0111 value</code>
 	 */
 	SET_A2(0x0111, 1, false) {
 		@Override
@@ -171,7 +209,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Set A3<br>
-	 * <tt>0x0112 value</tt>
+	 * <code>0x0112 value</code>
 	 */
 	SET_A3(0x0112, 1, false) {
 		@Override
@@ -181,7 +219,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Set A4<br>
-	 * <tt>0x0113 value</tt>
+	 * <code>0x0113 value</code>
 	 */
 	SET_A4(0x0113, 1, false) {
 		@Override
@@ -191,7 +229,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Set A1 and A2<br>
-	 * <tt>0x0114 value value</tt>
+	 * <code>0x0114 value value</code>
 	 */
 	SET_A1_A2(0x0114, 2, false) {
 		@Override
@@ -202,7 +240,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Set A3 and A4<br>
-	 * <tt>0x0115 value value</tt>
+	 * <code>0x0115 value value</code>
 	 */
 	SET_A3_A4(0x0115, 2, false) {
 		@Override
@@ -213,7 +251,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Set B1<br>
-	 * <tt>0x0116 value</tt>
+	 * <code>0x0116 value</code>
 	 */
 	SET_B1(0x0116, 1, false) {
 		@Override
@@ -223,7 +261,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Set B2<br>
-	 * <tt>0x0117 value</tt>
+	 * <code>0x0117 value</code>
 	 */
 	SET_B2(0x0117, 1, false) {
 		@Override
@@ -233,7 +271,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Set B3<br>
-	 * <tt>0x0118 value</tt>
+	 * <code>0x0118 value</code>
 	 */
 	SET_B3(0x0118, 1, false) {
 		@Override
@@ -243,7 +281,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Set B4<br>
-	 * <tt>0x0119 value</tt>
+	 * <code>0x0119 value</code>
 	 */
 	SET_B4(0x0119, 1, false) {
 		@Override
@@ -253,7 +291,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Set B1 and B2<br>
-	 * <tt>0x011a value value</tt>
+	 * <code>0x011a value value</code>
 	 */
 	SET_B1_B2(0x011a, 2, false) {
 		@Override
@@ -264,7 +302,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Set B3 and B4<br>
-	 * <tt>0x011b value value</tt>
+	 * <code>0x011b value value</code>
 	 */
 	SET_B3_B4(0x011b, 2, false) {
 		@Override
@@ -275,7 +313,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Copies addr to addr+3 into A<br>
-	 * <tt>0x011c addr</tt>
+	 * <code>0x011c addr</code>
 	 */
 	SET_A_IND(0x011c, 1, false) {
 		@Override
@@ -293,7 +331,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Copies addr to addr+3 into B<br>
-	 * <tt>0x011d addr</tt>
+	 * <code>0x011d addr</code>
 	 */
 	SET_B_IND(0x011d, 1, false) {
 		@Override
@@ -310,8 +348,46 @@ public enum FunctionCode {
 		}
 	},
 	/**
+	 * Copies addr to addr+3 into A<br>
+	 * <code>0x011e addr</code><br>
+	 * To be used by calling EXT_FUN_VAL, passing source address as <b>value</b>
+	 */
+	SET_A_DAT(0x011e, 1, false) {
+		@Override
+		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
+			// Validate data offset in arg1
+			checkDataAddress(state, functionData.value1, 4);
+
+			int dataIndex = (int) (functionData.value1 & Integer.MAX_VALUE);
+
+			state.a1 = state.dataByteBuffer.getLong(dataIndex++ * MachineState.VALUE_SIZE);
+			state.a2 = state.dataByteBuffer.getLong(dataIndex++ * MachineState.VALUE_SIZE);
+			state.a3 = state.dataByteBuffer.getLong(dataIndex++ * MachineState.VALUE_SIZE);
+			state.a4 = state.dataByteBuffer.getLong(dataIndex++ * MachineState.VALUE_SIZE);
+		}
+	},
+	/**
+	 * Copies addr to addr+3 into B<br>
+	 * <code>0x011f addr</code><br>
+	 * To be used by calling EXT_FUN_VAL, passing source address as <b>value</b>
+	 */
+	SET_B_DAT(0x011f, 1, false) {
+		@Override
+		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
+			// Validate data offset in arg1
+			checkDataAddress(state, functionData.value1, 4);
+
+			int dataIndex = (int) (functionData.value1 & Integer.MAX_VALUE);
+
+			state.b1 = state.dataByteBuffer.getLong(dataIndex++ * MachineState.VALUE_SIZE);
+			state.b2 = state.dataByteBuffer.getLong(dataIndex++ * MachineState.VALUE_SIZE);
+			state.b3 = state.dataByteBuffer.getLong(dataIndex++ * MachineState.VALUE_SIZE);
+			state.b4 = state.dataByteBuffer.getLong(dataIndex++ * MachineState.VALUE_SIZE);
+		}
+	},
+	/**
 	 * Clear A<br>
-	 * <tt>0x0120</tt>
+	 * <code>0x0120</code>
 	 */
 	CLEAR_A(0x0120, 0, false) {
 		@Override
@@ -324,7 +400,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Clear B<br>
-	 * <tt>0x0121</tt>
+	 * <code>0x0121</code>
 	 */
 	CLEAR_B(0x0121, 0, false) {
 		@Override
@@ -337,7 +413,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Clear A and B<br>
-	 * <tt>0x0122</tt>
+	 * <code>0x0122</code>
 	 */
 	CLEAR_A_AND_B(0x0122, 0, false) {
 		@Override
@@ -354,7 +430,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Copy A from B<br>
-	 * <tt>0x0123</tt>
+	 * <code>0x0123</code>
 	 */
 	COPY_A_FROM_B(0x0123, 0, false) {
 		@Override
@@ -367,7 +443,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Copy B from A<br>
-	 * <tt>0x0124</tt>
+	 * <code>0x0124</code>
 	 */
 	COPY_B_FROM_A(0x0124, 0, false) {
 		@Override
@@ -380,7 +456,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Check A is zero<br>
-	 * <tt>0x0125</tt><br>
+	 * <code>0x0125</code><br>
 	 * Returns 1 if true, 0 if false
 	 */
 	CHECK_A_IS_ZERO(0x0125, 0, true) {
@@ -394,7 +470,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Check B is zero<br>
-	 * <tt>0x0126</tt><br>
+	 * <code>0x0126</code><br>
 	 * Returns 1 if true, 0 if false
 	 */
 	CHECK_B_IS_ZERO(0x0126, 0, true) {
@@ -408,7 +484,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Check A equals B<br>
-	 * <tt>0x0127</tt><br>
+	 * <code>0x0127</code><br>
 	 * Returns 1 if true, 0 if false
 	 */
 	CHECK_A_EQUALS_B(0x0127, 0, true) {
@@ -422,7 +498,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Swap A with B<br>
-	 * <tt>0x0128</tt>
+	 * <code>0x0128</code>
 	 */
 	SWAP_A_AND_B(0x0128, 0, false) {
 		@Override
@@ -445,7 +521,8 @@ public enum FunctionCode {
 	},
 	/**
 	 * Bitwise-OR A with B<br>
-	 * <tt>0x0129</tt>
+	 * <code>0x0129</code><br>
+	 * A = A | B
 	 */
 	OR_A_WITH_B(0x0129, 0, false) {
 		@Override
@@ -458,20 +535,22 @@ public enum FunctionCode {
 	},
 	/**
 	 * Bitwise-OR B with A<br>
-	 * <tt>0x012a</tt>
+	 * <code>0x012a</code><br>
+	 * B = B | A
 	 */
 	OR_B_WITH_A(0x012a, 0, false) {
 		@Override
 		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
-			state.b1 = state.a1 | state.b1;
-			state.b2 = state.a2 | state.b2;
-			state.b3 = state.a3 | state.b3;
-			state.b4 = state.a4 | state.b4;
+			state.b1 = state.b1 | state.a1;
+			state.b2 = state.b2 | state.a2;
+			state.b3 = state.b3 | state.a3;
+			state.b4 = state.b4 | state.a4;
 		}
 	},
 	/**
 	 * Bitwise-AND A with B<br>
-	 * <tt>0x012b</tt>
+	 * <code>0x012b</code><br>
+	 * A = A &amp; B
 	 */
 	AND_A_WITH_B(0x012b, 0, false) {
 		@Override
@@ -484,20 +563,22 @@ public enum FunctionCode {
 	},
 	/**
 	 * Bitwise-AND B with A<br>
-	 * <tt>0x012c</tt>
+	 * <code>0x012c</code><br>
+	 * B = B &amp; A
 	 */
 	AND_B_WITH_A(0x012c, 0, false) {
 		@Override
 		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
-			state.b1 = state.a1 & state.b1;
-			state.b2 = state.a2 & state.b2;
-			state.b3 = state.a3 & state.b3;
-			state.b4 = state.a4 & state.b4;
+			state.b1 = state.b1 & state.a1;
+			state.b2 = state.b2 & state.a2;
+			state.b3 = state.b3 & state.a3;
+			state.b4 = state.b4 & state.a4;
 		}
 	},
 	/**
 	 * Bitwise-XOR A with B<br>
-	 * <tt>0x012d</tt>
+	 * <code>0x012d</code><br>
+	 * A = A ^ B
 	 */
 	XOR_A_WITH_B(0x012d, 0, false) {
 		@Override
@@ -510,20 +591,65 @@ public enum FunctionCode {
 	},
 	/**
 	 * Bitwise-XOR B with A<br>
-	 * <tt>0x012e</tt>
+	 * <code>0x012e</code><br>
+	 * B = B ^ A
 	 */
 	XOR_B_WITH_A(0x012e, 0, false) {
 		@Override
 		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
-			state.b1 = state.a1 ^ state.b1;
-			state.b2 = state.a2 ^ state.b2;
-			state.b3 = state.a3 ^ state.b3;
-			state.b4 = state.a4 ^ state.b4;
+			state.b1 = state.b1 ^ state.a1;
+			state.b2 = state.b2 ^ state.a2;
+			state.b3 = state.b3 ^ state.a3;
+			state.b4 = state.b4 ^ state.a4;
+		}
+	},
+	/**
+	 * Unsigned compare A with B<br>
+	 * <code>0x0130</code><br>
+	 * Returns -1, 0 or 1 depending on whether A is less than, equal or greater than B.
+	 */
+	UNSIGNED_COMPARE_A_WITH_B(0x0130, 0, true) {
+		@Override
+		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
+			int result = Long.compareUnsigned(state.a1, state.b1);
+
+			if (result == 0)
+				result = Long.compareUnsigned(state.a2, state.b2);
+
+			if (result == 0)
+				result = Long.compareUnsigned(state.a3, state.a3);
+
+			if (result == 0)
+				result = Long.compareUnsigned(state.a4, state.a4);
+
+			functionData.returnValue = Long.valueOf(result);
+		}
+	},
+	/**
+	 * Signed compare A with B<br>
+	 * <code>0x0131</code><br>
+	 * Returns -1, 0 or 1 depending on whether A is less than, equal or greater than B.
+	 */
+	SIGNED_COMPARE_A_WITH_B(0x0131, 0, true) {
+		@Override
+		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
+			int result = Long.compare(state.a1, state.b1);
+
+			if (result == 0)
+				result = Long.compare(state.a2, state.b2);
+
+			if (result == 0)
+				result = Long.compare(state.a3, state.a3);
+
+			if (result == 0)
+				result = Long.compare(state.a4, state.a4);
+
+			functionData.returnValue = Long.valueOf(result);
 		}
 	},
 	/**
 	 * MD5 data into B<br>
-	 * <tt>0x0200 start-addr byte-length</tt><br>
+	 * <code>0x0200 start-addr byte-length</code><br>
 	 * MD5 hash stored in B1 and B2. B3 and B4 are zeroed.
 	 */
 	MD5_INTO_B(0x0200, 2, false) {
@@ -548,7 +674,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Check MD5 of data matches B<br>
-	 * <tt>0x0201 start-addr byte-length</tt><br>
+	 * <code>0x0201 start-addr byte-length</code><br>
 	 * Other MD5 hash is in B1 and B2. B3 and B4 are ignored.<br>
 	 * Returns 1 if true, 0 if false
 	 */
@@ -579,7 +705,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * RIPE-MD160 data into B<br>
-	 * <tt>0x0202 start-addr byte-length</tt><br>
+	 * <code>0x0202 start-addr byte-length</code><br>
 	 * RIPE-MD160 hash stored in LSB of B1 and all of B2 and B3. B4 is zeroed.
 	 */
 	RMD160_INTO_B(0x0202, 2, false) {
@@ -604,7 +730,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Check RIPE-MD160 of data matches B<br>
-	 * <tt>0x0203 start-addr byte-length</tt><br>
+	 * <code>0x0203 start-addr byte-length</code><br>
 	 * Other RIPE-MD160 hash is in LSB of B1 and all of B2 and B3. B4 is ignored.<br>
 	 * Returns 1 if true, 0 if false
 	 */
@@ -637,7 +763,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * SHA256 data into B<br>
-	 * <tt>0x0204 start-addr byte-length</tt><br>
+	 * <code>0x0204 start-addr byte-length</code><br>
 	 * SHA256 hash is stored in B1 through B4.
 	 */
 	SHA256_INTO_B(0x0204, 2, false) {
@@ -662,7 +788,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Check SHA256 of data matches B<br>
-	 * <tt>0x0205 start-addr byte-length</tt><br>
+	 * <code>0x0205 start-addr byte-length</code><br>
 	 * Other SHA256 hash is in B1 through B4.<br>
 	 * Returns 1 if true, 0 if false
 	 */
@@ -695,7 +821,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * HASH160 data into B<br>
-	 * <tt>0x0206 start-addr byte-length</tt><br>
+	 * <code>0x0206 start-addr byte-length</code><br>
 	 * Bitcoin's HASH160 hash is equivalent to RMD160(SHA256(data)).<br>
 	 * HASH160 hash stored in LSB of B1 and all of B2 and B3. B4 is zeroed.
 	 */
@@ -724,7 +850,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Check HASH160 of data matches B<br>
-	 * <tt>0x0207 start-addr byte-length</tt><br>
+	 * <code>0x0207 start-addr byte-length</code><br>
 	 * Other HASH160 hash is in B1, B2 and LSB of B3. B4 is ignored.
 	 * Returns 1 if true, 0 if false
 	 */
@@ -759,7 +885,7 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0300</tt><br>
+	 * <code>0x0300</code><br>
 	 * Returns current block's "timestamp"
 	 */
 	GET_BLOCK_TIMESTAMP(0x0300, 0, true) {
@@ -769,7 +895,7 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0301</tt><br>
+	 * <code>0x0301</code><br>
 	 * Returns AT's creation block's "timestamp"
 	 */
 	GET_CREATION_TIMESTAMP(0x0301, 0, true) {
@@ -779,7 +905,7 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0302</tt><br>
+	 * <code>0x0302</code><br>
 	 * Returns previous block's "timestamp"
 	 */
 	GET_PREVIOUS_BLOCK_TIMESTAMP(0x0302, 0, true) {
@@ -790,7 +916,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Put previous block's hash in A<br>
-	 * <tt>0x0303</tt>
+	 * <code>0x0303</code>
 	 */
 	PUT_PREVIOUS_BLOCK_HASH_INTO_A(0x0303, 0, false) {
 		@Override
@@ -800,7 +926,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Put transaction (to this AT) after timestamp in A, or zero if none<br>
-	 * <tt>0x0304 timestamp</tt><br>
+	 * <code>0x0304 timestamp</code><br>
 	 * a-k-a "A_To_Tx_After_Timestamp"
 	 */
 	PUT_TX_AFTER_TIMESTAMP_INTO_A(0x0304, 1, false) {
@@ -810,7 +936,7 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0305</tt><br>
+	 * <code>0x0305</code><br>
 	 * Return transaction type from transaction in A<br>
 	 * Returns 0xffffffffffffffff in A not valid transaction
 	 */
@@ -821,7 +947,7 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0306</tt><br>
+	 * <code>0x0306</code><br>
 	 * Return transaction amount from transaction in A<br>
 	 * Returns 0xffffffffffffffff in A not valid transaction
 	 */
@@ -832,7 +958,7 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0307</tt><br>
+	 * <code>0x0307</code><br>
 	 * Return transaction timestamp from transaction in A<br>
 	 * Returns 0xffffffffffffffff in A not valid transaction
 	 */
@@ -844,7 +970,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Generate random number using transaction in A<br>
-	 * <tt>0x0308</tt><br>
+	 * <code>0x0308</code><br>
 	 * Returns 0xffffffffffffffff in A not valid transaction<br>
 	 * Can sleep to use next block as source of entropy
 	 */
@@ -866,7 +992,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Put 'message' from transaction in A into B<br>
-	 * <tt>0x0309</tt><br>
+	 * <code>0x0309</code><br>
 	 * If transaction has no 'message' then zero B<br>
 	 * Example 'message' could be 256-bit shared secret
 	 */
@@ -878,7 +1004,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Put sender/creator address from transaction in A into B<br>
-	 * <tt>0x030a</tt>
+	 * <code>0x030a</code>
 	 */
 	PUT_ADDRESS_FROM_TX_IN_A_INTO_B(0x030a, 0, false) {
 		@Override
@@ -888,7 +1014,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Put AT's creator's address into B<br>
-	 * <tt>0x030b</tt>
+	 * <code>0x030b</code>
 	 */
 	PUT_CREATOR_INTO_B(0x030b, 0, false) {
 		@Override
@@ -897,7 +1023,7 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0400</tt><br>
+	 * <code>0x0400</code><br>
 	 * Returns AT's current balance
 	 */
 	GET_CURRENT_BALANCE(0x0400, 0, true) {
@@ -907,7 +1033,7 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0401</tt><br>
+	 * <code>0x0401</code><br>
 	 * Returns AT's previous balance at end of last execution round<br>
 	 * Does not include any amounts sent to AT since
 	 */
@@ -919,7 +1045,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Pay fee-inclusive amount to account address in B<br>
-	 * <tt>0x0402 amount</tt><br>
+	 * <code>0x0402 amount</code><br>
 	 * Reduces amount to current balance rather than failing due to insufficient funds
 	 */
 	PAY_TO_ADDRESS_IN_B(0x0402, 1, false) {
@@ -941,7 +1067,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Pay all remaining funds to account address in B<br>
-	 * <tt>0x0403</tt>
+	 * <code>0x0403</code>
 	 */
 	PAY_ALL_TO_ADDRESS_IN_B(0x0403, 0, false) {
 		@Override
@@ -955,7 +1081,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Pay previous balance to account address in B<br>
-	 * <tt>0x0404</tt><br>
+	 * <code>0x0404</code><br>
 	 * Reduces amount to current balance rather than failing due to insufficient funds
 	 */
 	PAY_PREVIOUS_TO_ADDRESS_IN_B(0x0404, 0, false) {
@@ -977,7 +1103,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Send A as a message to address in B<br>
-	 * <tt>0x0405</tt>
+	 * <code>0x0405</code>
 	 */
 	MESSAGE_A_TO_ADDRESS_IN_B(0x0405, 0, false) {
 		@Override
@@ -987,7 +1113,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * Add minutes to timestamp<br>
-	 * <tt>0x0406 timestamp minutes</tt><br>
+	 * <code>0x0406 timestamp minutes</code><br>
 	 * Return 'timestamp' based on passed 'timestamp' plus minutes
 	 */
 	ADD_MINUTES_TO_TIMESTAMP(0x0406, 2, true) {
@@ -997,7 +1123,7 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0500 - 0x06ff</tt><br>
+	 * <code>0x0500 - 0x06ff</code><br>
 	 * Platform-specific functions.<br>
 	 * These are passed through to the API
 	 */
@@ -1050,12 +1176,10 @@ public enum FunctionCode {
 	/**
 	 * Execute Function
 	 * <p>
-	 * Can modify various fields of <tt>state</tt>, including <tt>programCounter</tt>.
+	 * Can modify various fields of <code>state</code>, including <code>programCounter</code>.
 	 * <p>
-	 * Throws a subclass of <tt>ExecutionException</tt> on error, e.g. <tt>InvalidAddressException</tt>.
+	 * Throws a subclass of <code>ExecutionException</code> on error, e.g. <code>InvalidAddressException</code>.
 	 *
-	 * @param functionData
-	 * @param state
 	 * @throws ExecutionException
 	 */
 	public void execute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
@@ -1073,7 +1197,7 @@ public enum FunctionCode {
 		postCheckExecute(functionData, state, rawFunctionCode);
 	}
 
-	/** Actually execute function */
+	/** Actually execute function after checks have completed. */
 	protected abstract void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException;
 
 	// TODO: public abstract String disassemble();

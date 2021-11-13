@@ -13,19 +13,19 @@ import java.util.stream.Collectors;
  * <p>
  * Op codes are represented by a single byte and maybe be followed by additional arguments like data addresses, offset, immediate values, etc.
  * <p>
- * OpCode instances can be obtained via the default <tt>OpCode.valueOf(String)</tt> or the additional <tt>OpCode.valueOf(int)</tt>.
+ * OpCode instances can be obtained via the default <code>OpCode.valueOf(String)</code> or the additional <code>OpCode.valueOf(int)</code>.
  * <p>
- * Use the <tt>OpCode.execute</tt> method to perform the operation.
+ * Use the <code>OpCode.execute</code> method to perform the operation.
  * <p>
  * In the documentation for each OpCode:
  * <p>
- * <tt>@addr</tt> means "store at <tt>addr</tt>"
+ * <code>@addr</code> means "store at <code>addr</code>"
  * <p>
- * <tt>$addr</tt> means "fetch from <tt>addr</tt>"
+ * <code>$addr</code> means "fetch from <code>addr</code>"
  * <p>
- * <tt>@($addr)</tt> means "store at address fetched from <tt>addr</tt>", i.e. indirect
+ * <code>@($addr)</code> means "store at address fetched from <code>addr</code>", i.e. indirect
  * <p>
- * <tt>$($addr1 + $addr2)</tt> means "fetch from address fetched from <tt>addr1</tt> plus offset fetched from <tt>addr2</tt>", i.e. indirect indexed
+ * <code>$($addr1 + $addr2)</code> means "fetch from address fetched from <code>addr1</code> plus offset fetched from <code>addr2</code>", i.e. indirect indexed
  * 
  * @see OpCode#valueOf(int)
  * @see OpCode#executeWithParams(MachineState, Object...)
@@ -34,7 +34,7 @@ public enum OpCode {
 
 	/**
 	 * <b>N</b>o <b>OP</b>eration<br>
-	 * <tt>0x7f</tt><br>
+	 * <code>0x7f</code><br>
 	 * (Does nothing)
 	 */
 	NOP(0x7f) {
@@ -45,8 +45,8 @@ public enum OpCode {
 	},
 	/**
 	 * <b>SET</b> <b>VAL</b>ue<br>
-	 * <tt>0x01 addr value</tt><br>
-	 * <tt>@addr = value</tt>
+	 * <code>0x01 addr value</code><br>
+	 * <code>@addr = value</code>
 	 */
 	SET_VAL(0x01, OpCodeParam.DEST_ADDR, OpCodeParam.VALUE) {
 		@Override
@@ -59,8 +59,8 @@ public enum OpCode {
 	},
 	/**
 	 * <b>SET</b> <b>DAT</b>a<br>
-	 * <tt>0x02 addr1 addr2</tt><br>
-	 * <tt>@addr1 = $addr2</tt>
+	 * <code>0x02 addr1 addr2</code><br>
+	 * <code>@addr1 = $addr2</code>
 	 */
 	SET_DAT(0x02, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
@@ -74,8 +74,8 @@ public enum OpCode {
 	},
 	/**
 	 * <b>CL</b>ea<b>R</b> <b>DAT</b>a<br>
-	 * <tt>0x03 addr</tt><br>
-	 * <tt>@addr = 0</tt>
+	 * <code>0x03 addr</code><br>
+	 * <code>@addr = 0</code>
 	 */
 	CLR_DAT(0x03, OpCodeParam.DEST_ADDR) {
 		@Override
@@ -87,8 +87,8 @@ public enum OpCode {
 	},
 	/**
 	 * <b>INC</b>rement <b>DAT</b>a<br>
-	 * <tt>0x04 addr</tt><br>
-	 * <tt>@addr += 1</tt>
+	 * <code>0x04 addr</code><br>
+	 * <code>@addr += 1</code>
 	 */
 	INC_DAT(0x04, OpCodeParam.DEST_ADDR) {
 		@Override
@@ -101,8 +101,8 @@ public enum OpCode {
 	},
 	/**
 	 * <b>DEC</b>rement <b>DAT</b>a<br>
-	 * <tt>0x05 addr</tt><br>
-	 * <tt>@addr -= 1</tt>
+	 * <code>0x05 addr</code><br>
+	 * <code>@addr -= 1</code>
 	 */
 	DEC_DAT(0x05, OpCodeParam.DEST_ADDR) {
 		@Override
@@ -115,8 +115,8 @@ public enum OpCode {
 	},
 	/**
 	 * <b>ADD</b> <b>DAT</b>a<br>
-	 * <tt>0x06 addr1 addr2</tt><br>
-	 * <tt>@addr1 += $addr2</tt>
+	 * <code>0x06 addr1 addr2</code><br>
+	 * <code>@addr1 += $addr2</code>
 	 */
 	ADD_DAT(0x06, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
@@ -126,8 +126,8 @@ public enum OpCode {
 	},
 	/**
 	 * <b>SUB</b>tract <b>DAT</b>a<br>
-	 * <tt>0x07 addr1 addr2</tt><br>
-	 * <tt>@addr1 -= $addr2</tt>
+	 * <code>0x07 addr1 addr2</code><br>
+	 * <code>@addr1 -= $addr2</code>
 	 */
 	SUB_DAT(0x07, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
@@ -137,8 +137,8 @@ public enum OpCode {
 	},
 	/**
 	 * <b>MUL</b>tiply <b>DAT</b>a<br>
-	 * <tt>0x08 addr1 addr2</tt><br>
-	 * <tt>@addr1 *= $addr2</tt>
+	 * <code>0x08 addr1 addr2</code><br>
+	 * <code>@addr1 *= $addr2</code>
 	 */
 	MUL_DAT(0x08, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
@@ -148,9 +148,9 @@ public enum OpCode {
 	},
 	/**
 	 * <b>DIV</b>ide <b>DAT</b>a<br>
-	 * <tt>0x09 addr1 addr2</tt><br>
-	 * <tt>@addr1 /= $addr2</tt><br>
-	 * Can also throw <tt>IllegealOperationException</tt> if divide-by-zero attempted.
+	 * <code>0x09 addr1 addr2</code><br>
+	 * <code>@addr1 /= $addr2</code><br>
+	 * Can also throw <code>IllegalOperationException</code> if divide-by-zero attempted.
 	 */
 	DIV_DAT(0x09, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
@@ -164,8 +164,8 @@ public enum OpCode {
 	},
 	/**
 	 * <b>B</b>inary-<b>OR</b> <b>DAT</b>a<br>
-	 * <tt>0x0a addr1 addr2</tt><br>
-	 * <tt>@addr1 |= $addr2</tt>
+	 * <code>0x0a addr1 addr2</code><br>
+	 * <code>@addr1 |= $addr2</code>
 	 */
 	BOR_DAT(0x0a, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
@@ -175,8 +175,8 @@ public enum OpCode {
 	},
 	/**
 	 * Binary-<b>AND</b> <b>DAT</b>a<br>
-	 * <tt>0x0b addr1 addr2</tt><br>
-	 * <tt>@addr1 &= $addr2</tt>
+	 * <code>0x0b addr1 addr2</code><br>
+	 * <code>@addr1 &amp;= $addr2</code>
 	 */
 	AND_DAT(0x0b, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
@@ -186,8 +186,8 @@ public enum OpCode {
 	},
 	/**
 	 * E<b>X</b>clusive <b>OR</b> <b>DAT</b>a<br>
-	 * <tt>0x0c addr1 addr2</tt><br>
-	 * <tt>@addr1 ^= $addr2</tt>
+	 * <code>0x0c addr1 addr2</code><br>
+	 * <code>@addr1 ^= $addr2</code>
 	 */
 	XOR_DAT(0x0c, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
@@ -197,8 +197,8 @@ public enum OpCode {
 	},
 	/**
 	 * Bitwise-<b>NOT</b> <b>DAT</b>a<br>
-	 * <tt>0x0d addr</tt><br>
-	 * <tt>@addr = ~$addr</tt>
+	 * <code>0x0d addr</code><br>
+	 * <code>@addr = ~$addr</code>
 	 */
 	NOT_DAT(0x0d, OpCodeParam.DEST_ADDR) {
 		@Override
@@ -211,8 +211,8 @@ public enum OpCode {
 	},
 	/**
 	 * <b>SET</b> using <b>IND</b>irect data<br>
-	 * <tt>0x0e addr1 addr2</tt><br>
-	 * <tt>@addr1 = $($addr2)</tt>
+	 * <code>0x0e addr1 addr2</code><br>
+	 * <code>@addr1 = $($addr2)</code>
 	 */
 	SET_IND(0x0e, OpCodeParam.DEST_ADDR, OpCodeParam.INDIRECT_SRC_ADDR) {
 		@Override
@@ -231,8 +231,8 @@ public enum OpCode {
 	},
 	/**
 	 * <b>SET</b> using indirect <b>I</b>n<b>D</b>e<b>X</b>ed data<br>
-	 * <tt>0x0f addr1 addr2 addr3</tt><br>
-	 * <tt>@addr1 = $($addr2 + $addr3)</tt>
+	 * <code>0x0f addr1 addr2 addr3</code><br>
+	 * <code>@addr1 = $($addr2 + $addr3)</code>
 	 */
 	SET_IDX(0x0f, OpCodeParam.DEST_ADDR, OpCodeParam.INDIRECT_SRC_ADDR_WITH_INDEX, OpCodeParam.INDEX) {
 		@Override
@@ -255,9 +255,9 @@ public enum OpCode {
 	},
 	/**
 	 * <b>P</b>u<b>SH</b> <b>DAT</b>a onto user stack<br>
-	 * <tt>0x10 addr</tt><br>
-	 * <tt>@--user_stack = $addr</tt><br>
-	 * Can also throw <tt>StackBoundsException</tt> if user stack exhausted.
+	 * <code>0x10 addr</code><br>
+	 * <code>@--user_stack = $addr</code><br>
+	 * Can also throw <code>StackBoundsException</code> if user stack exhausted.
 	 */
 	PSH_DAT(0x10, OpCodeParam.SRC_ADDR) {
 		@Override
@@ -278,9 +278,9 @@ public enum OpCode {
 	},
 	/**
 	 * <b>POP</b> <b>DAT</b>a from user stack<br>
-	 * <tt>0x11 addr</tt><br>
-	 * <tt>@addr = $user_stack++</tt><br>
-	 * Can also throw <tt>StackBoundsException</tt> if user stack empty.
+	 * <code>0x11 addr</code><br>
+	 * <code>@addr = $user_stack++</code><br>
+	 * Can also throw <code>StackBoundsException</code> if user stack empty.
 	 */
 	POP_DAT(0x11, OpCodeParam.DEST_ADDR) {
 		@Override
@@ -302,9 +302,10 @@ public enum OpCode {
 	},
 	/**
 	 * <b>J</b>u<b>MP</b> into <b>SUB</b>routine<br>
-	 * <tt>0x12 addr</tt><br>
-	 * <tt>@--call_stack = PC after opcode & args</tt>, <tt>PC = addr</tt><br>
-	 * Can also throw <tt>StackBoundsException</tt> if call stack exhausted.
+	 * <code>0x12 addr</code><br>
+	 * <code>@--call_stack = PC after opcode and args</code>,<br>
+	 * <code>PC = addr</code><br>
+	 * Can also throw <code>StackBoundsException</code> if call stack exhausted.
 	 */
 	JMP_SUB(0x12, OpCodeParam.CODE_ADDR) {
 		@Override
@@ -325,9 +326,9 @@ public enum OpCode {
 	},
 	/**
 	 * <b>RET</b>urn from <b>SUB</b>routine<br>
-	 * <tt>0x13<br>
-	 * <tt>PC = $call_stack++</tt><br>
-	 * Can also throw <tt>StackBoundsException</tt> if call stack empty.
+	 * <code>0x13</code><br>
+	 * <code>PC = $call_stack++</code><br>
+	 * Can also throw <code>StackBoundsException</code> if call stack empty.
 	 */
 	RET_SUB(0x13) {
 		@Override
@@ -346,8 +347,8 @@ public enum OpCode {
 	},
 	/**
 	 * Store <b>IND</b>irect <b>DAT</b>a<br>
-	 * <tt>0x14 addr1 addr2<br>
-	 * <tt>@($addr1) = $addr2</tt>
+	 * <code>0x14 addr1 addr2</code><br>
+	 * <code>@($addr1) = $addr2</code>
 	 */
 	IND_DAT(0x14, OpCodeParam.INDIRECT_DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
@@ -366,8 +367,8 @@ public enum OpCode {
 	},
 	/**
 	 * Store indirect <b>I</b>n<b>D</b>e<b>X</b>ed <b>DAT</b>a<br>
-	 * <tt>0x15 addr1 addr2<br>
-	 * <tt>@($addr1 + $addr2) = $addr3</tt>
+	 * <code>0x15 addr1 addr2</code><br>
+	 * <code>@($addr1 + $addr2) = $addr3</code>
 	 */
 	IDX_DAT(0x15, OpCodeParam.INDIRECT_DEST_ADDR_WITH_INDEX, OpCodeParam.INDEX, OpCodeParam.SRC_ADDR) {
 		@Override
@@ -390,8 +391,8 @@ public enum OpCode {
 	},
 	/**
 	 * <b>MOD</b>ulo <b>DAT</b>a<br>
-	 * <tt>0x16 addr1 addr2</tt><br>
-	 * <tt>@addr1 %= $addr2</tt>
+	 * <code>0x16 addr1 addr2</code><br>
+	 * <code>@addr1 %= $addr2</code>
 	 */
 	MOD_DAT(0x16, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
@@ -405,8 +406,8 @@ public enum OpCode {
 	},
 	/**
 	 * <b>SH</b>ift <b>L</b>eft <b>DAT</b>a<br>
-	 * <tt>0x17 addr1 addr2</tt><br>
-	 * <tt>@addr1 <<= $addr2</tt>
+	 * <code>0x17 addr1 addr2</code><br>
+	 * <code>@addr1 &lt;&lt;= $addr2</code>
 	 */
 	SHL_DAT(0x17, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		private static final long MAX_SHIFT = MachineState.VALUE_SIZE * 8L;
@@ -419,8 +420,8 @@ public enum OpCode {
 	},
 	/**
 	 * <b>SH</b>ift <b>R</b>ight <b>DAT</b>a<br>
-	 * <tt>0x18 addr1 addr2</tt><br>
-	 * <tt>@addr1 >>= $addr2</tt><br>
+	 * <code>0x18 addr1 addr2</code><br>
+	 * <code>@addr1 &gt;&gt;= $addr2</code><br>
 	 * Note: new MSB bit will be zero
 	 */
 	SHR_DAT(0x18, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
@@ -434,8 +435,8 @@ public enum OpCode {
 	},
 	/**
 	 * <b>J</b>u<b>MP</b> to <b>AD</b>d<b>R</b>ess<br>
-	 * <tt>0x1a addr</tt><br>
-	 * <tt>PC = addr</tt>
+	 * <code>0x1a addr</code><br>
+	 * <code>PC = addr</code>
 	 */
 	JMP_ADR(0x1a, OpCodeParam.CODE_ADDR) {
 		@Override
@@ -447,9 +448,9 @@ public enum OpCode {
 	},
 	/**
 	 * <b>B</b>ranch if <b>Z</b>e<b>R</b>o<br>
-	 * <tt>0x1b addr offset</tt><br>
-	 * <tt>if ($addr == 0) PC += offset</tt><br>
-	 * Note: <tt>PC</tt> is considered to be immediately before opcode byte.
+	 * <code>0x1b addr offset</code><br>
+	 * <code>if ($addr == 0) PC += offset</code><br>
+	 * Note: <code>PC</code> is considered to be immediately before opcode byte.
 	 */
 	BZR_DAT(0x1b, OpCodeParam.SRC_ADDR, OpCodeParam.OFFSET) {
 		@Override
@@ -467,9 +468,9 @@ public enum OpCode {
 	},
 	/**
 	 * <b>B</b>ranch if <b>N</b>ot <b>Z</b>ero<br>
-	 * <tt>0x1e addr offset</tt><br>
-	 * <tt>if ($addr != 0) PC += offset</tt><br>
-	 * Note: <tt>PC</tt> is considered to be immediately before opcode byte.
+	 * <code>0x1e addr offset</code><br>
+	 * <code>if ($addr != 0) PC += offset</code><br>
+	 * Note: <code>PC</code> is considered to be immediately before opcode byte.
 	 */
 	BNZ_DAT(0x1e, OpCodeParam.SRC_ADDR, OpCodeParam.OFFSET) {
 		@Override
@@ -487,9 +488,9 @@ public enum OpCode {
 	},
 	/**
 	 * <b>B</b>ranch if <b>G</b>reater-<b>T</b>han <b>DAT</b>a<br>
-	 * <tt>0x1f addr1 addr2 offset</tt><br>
-	 * <tt>if ($addr1 > $addr2) PC += offset</tt><br>
-	 * Note: <tt>PC</tt> is considered to be immediately before opcode byte.
+	 * <code>0x1f addr1 addr2 offset</code><br>
+	 * <code>if ($addr1 &gt; $addr2) PC += offset</code><br>
+	 * Note: <code>PC</code> is considered to be immediately before opcode byte.
 	 */
 	BGT_DAT(0x1f, OpCodeParam.SRC_ADDR, OpCodeParam.SRC_ADDR, OpCodeParam.OFFSET) {
 		@Override
@@ -499,9 +500,9 @@ public enum OpCode {
 	},
 	/**
 	 * <b>B</b>ranch if <b>L</b>ess-<b>T</b>han <b>DAT</b>a<br>
-	 * <tt>0x20 addr1 addr2 offset</tt><br>
-	 * <tt>if ($addr1 < $addr2) PC += offset</tt><br>
-	 * Note: <tt>PC</tt> is considered to be immediately before opcode byte.
+	 * <code>0x20 addr1 addr2 offset</code><br>
+	 * <code>if ($addr1 &lt; $addr2) PC += offset</code><br>
+	 * Note: <code>PC</code> is considered to be immediately before opcode byte.
 	 */
 	BLT_DAT(0x20, OpCodeParam.SRC_ADDR, OpCodeParam.SRC_ADDR, OpCodeParam.OFFSET) {
 		@Override
@@ -511,9 +512,9 @@ public enum OpCode {
 	},
 	/**
 	 * <b>B</b>ranch if <b>G</b>reater-or-<b>E</b>qual <b>DAT</b>a<br>
-	 * <tt>0x21 addr1 addr2 offset</tt><br>
-	 * <tt>if ($addr1 >= $addr2) PC += offset</tt><br>
-	 * Note: <tt>PC</tt> is considered to be immediately before opcode byte.
+	 * <code>0x21 addr1 addr2 offset</code><br>
+	 * <code>if ($addr1 &gt;= $addr2) PC += offset</code><br>
+	 * Note: <code>PC</code> is considered to be immediately before opcode byte.
 	 */
 	BGE_DAT(0x21, OpCodeParam.SRC_ADDR, OpCodeParam.SRC_ADDR, OpCodeParam.OFFSET) {
 		@Override
@@ -523,9 +524,9 @@ public enum OpCode {
 	},
 	/**
 	 * <b>B</b>ranch if <b>L</b>ess-or-<b>E</b>qual <b>DAT</b>a<br>
-	 * <tt>0x22 addr1 addr2 offset</tt><br>
-	 * <tt>if ($addr1 <= $addr2) PC += offset</tt><br>
-	 * Note: <tt>PC</tt> is considered to be immediately before opcode byte.
+	 * <code>0x22 addr1 addr2 offset</code><br>
+	 * <code>if ($addr1 &lt;= $addr2) PC += offset</code><br>
+	 * Note: <code>PC</code> is considered to be immediately before opcode byte.
 	 */
 	BLE_DAT(0x22, OpCodeParam.SRC_ADDR, OpCodeParam.SRC_ADDR, OpCodeParam.OFFSET) {
 		@Override
@@ -535,9 +536,9 @@ public enum OpCode {
 	},
 	/**
 	 * <b>B</b>ranch if <b>EQ</b>ual <b>DAT</b>a<br>
-	 * <tt>0x23 addr1 addr2 offset</tt><br>
-	 * <tt>if ($addr1 == $addr2) PC += offset</tt><br>
-	 * Note: <tt>PC</tt> is considered to be immediately before opcode byte.
+	 * <code>0x23 addr1 addr2 offset</code><br>
+	 * <code>if ($addr1 == $addr2) PC += offset</code><br>
+	 * Note: <code>PC</code> is considered to be immediately before opcode byte.
 	 */
 	BEQ_DAT(0x23, OpCodeParam.SRC_ADDR, OpCodeParam.SRC_ADDR, OpCodeParam.OFFSET) {
 		@Override
@@ -547,9 +548,9 @@ public enum OpCode {
 	},
 	/**
 	 * <b>B</b>ranch if <b>N</b>ot-<b>E</b>qual <b>DAT</b>a<br>
-	 * <tt>0x24 addr1 addr2 offset</tt><br>
-	 * <tt>if ($addr1 != $addr2) PC += offset</tt><br>
-	 * Note: <tt>PC</tt> is considered to be immediately before opcode byte.
+	 * <code>0x24 addr1 addr2 offset</code><br>
+	 * <code>if ($addr1 != $addr2) PC += offset</code><br>
+	 * Note: <code>PC</code> is considered to be immediately before opcode byte.
 	 */
 	BNE_DAT(0x24, OpCodeParam.SRC_ADDR, OpCodeParam.SRC_ADDR, OpCodeParam.OFFSET) {
 		@Override
@@ -559,16 +560,16 @@ public enum OpCode {
 	},
 	/**
 	 * <b>SL</b>ee<b>P</b> until <b>DAT</b>a<br>
-	 * <tt>0x25 addr</tt><br>
-	 * <tt>sleep until $addr, then carry on from current PC</tt><br>
-	 * Note: The value from <tt>$addr</tt> is considered to be a block height.
+	 * <code>0x25 addr</code><br>
+	 * <code>sleep until $addr, then carry on from current PC</code><br>
+	 * Note: The value from <code>$addr</code> is considered to be a block height.
 	 */
 	SLP_DAT(0x25, OpCodeParam.BLOCK_HEIGHT) {
 		@Override
 		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			int address = (int) args[0];
 
-			long value = state.codeByteBuffer.getLong(address);
+			long value = state.dataByteBuffer.getLong(address);
 
 			state.setSleepUntilHeight((int) value);
 			state.setIsSleeping(true);
@@ -576,8 +577,8 @@ public enum OpCode {
 	},
 	/**
 	 * <b>FI</b>nish if <b>Z</b>ero <b>DAT</b>a<br>
-	 * <tt>0x26 addr</tt><br>
-	 * <tt>if ($addr == 0) permanently stop</tt>
+	 * <code>0x26 addr</code><br>
+	 * <code>if ($addr == 0) permanently stop</code>
 	 */
 	FIZ_DAT(0x26, OpCodeParam.SRC_ADDR) {
 		@Override
@@ -592,8 +593,8 @@ public enum OpCode {
 	},
 	/**
 	 * <b>ST</b>op if <b>Z</b>ero <b>DAT</b>a<br>
-	 * <tt>0x27 addr</tt><br>
-	 * <tt>if ($addr == 0) PC = PCS and stop</tt>
+	 * <code>0x27 addr</code><br>
+	 * <code>if ($addr == 0) PC = PCS and stop</code>
 	 */
 	STZ_DAT(0x27, OpCodeParam.SRC_ADDR) {
 		@Override
@@ -610,8 +611,8 @@ public enum OpCode {
 	},
 	/**
 	 * <b>FIN</b>ish <b>IM</b>me<b>D</b>iately<br>
-	 * <tt>0x28</tt><br>
-	 * <tt>permanently stop</tt>
+	 * <code>0x28</code><br>
+	 * <code>permanently stop</code>
 	 */
 	FIN_IMD(0x28) {
 		@Override
@@ -621,8 +622,8 @@ public enum OpCode {
 	},
 	/**
 	 * <b>ST</b>o<b>P</b> <b>IM</b>me<b>D</b>iately<br>
-	 * <tt>0x29</tt><br>
-	 * <tt>stop</tt>
+	 * <code>0x29</code><br>
+	 * <code>stop</code>
 	 */
 	STP_IMD(0x29) {
 		@Override
@@ -632,8 +633,8 @@ public enum OpCode {
 	},
 	/**
 	 * <b>SL</b>ee<b>P</b> <b>IM</b>me<b>D</b>iately<br>
-	 * <tt>0x2a</tt><br>
-	 * <tt>sleep until next block, then carry on from current PC</tt>
+	 * <code>0x2a</code><br>
+	 * <code>sleep until next block, then carry on from current PC</code>
 	 */
 	SLP_IMD(0x2a) {
 		@Override
@@ -644,8 +645,8 @@ public enum OpCode {
 	},
 	/**
 	 * Set <b>ERR</b>or <b>AD</b>d<b>R</b>ess<br>
-	 * <tt>0x2b addr</tt><br>
-	 * <tt>PCE = addr</tt>
+	 * <code>0x2b addr</code><br>
+	 * <code>PCE = addr</code>
 	 */
 	ERR_ADR(0x2b, OpCodeParam.CODE_ADDR) {
 		@Override
@@ -656,10 +657,25 @@ public enum OpCode {
 		}
 	},
 	/**
+	 * <b>SL</b>ee<b>P</b> for <b>VAL</b>ue blocks<br>
+	 * <code>0x2c value</code><br>
+	 * <code>sleep until $addr, then carry on from current PC</code><br>
+	 * Note: The value from <code>$addr</code> is considered to be a block height.
+	 */
+	SLP_VAL(0x2c, OpCodeParam.VALUE) {
+		@Override
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+			long value = (long) args[0];
+
+			state.setSleepUntilHeight(state.getCurrentBlockHeight() + (int) value);
+			state.setIsSleeping(true);
+		}
+	},
+	/**
 	 * <b>SET</b> <b>PCS</b> (stop address)<br>
-	 * <tt>0x30</tt><br>
-	 * <tt>PCS = PC</tt><br>
-	 * Note: <tt>PC</tt> is considered to be immediately after this opcode byte.
+	 * <code>0x30</code><br>
+	 * <code>PCS = PC</code><br>
+	 * Note: <code>PC</code> is considered to be immediately after this opcode byte.
 	 */
 	SET_PCS(0x30) {
 		@Override
@@ -669,8 +685,8 @@ public enum OpCode {
 	},
 	/**
 	 * Call <b>EXT</b>ernal <b>FUN</b>ction<br>
-	 * <tt>0x32 func</tt><br>
-	 * <tt>func()</tt>
+	 * <code>0x32 func</code><br>
+	 * <code>func()</code>
 	 */
 	EXT_FUN(0x32, OpCodeParam.FUNC) {
 		@Override
@@ -699,8 +715,8 @@ public enum OpCode {
 	},
 	/**
 	 * Call <b>EXT</b>ernal <b>FUN</b>ction with <b>DAT</b>a<br>
-	 * <tt>0x33 func addr</tt><br>
-	 * <tt>func($addr)</tt>
+	 * <code>0x33 func addr</code><br>
+	 * <code>func($addr)</code>
 	 */
 	EXT_FUN_DAT(0x33, OpCodeParam.FUNC, OpCodeParam.SRC_ADDR) {
 		@Override
@@ -731,8 +747,8 @@ public enum OpCode {
 	},
 	/**
 	 * Call <b>EXT</b>ernal <b>FUN</b>ction with <b>DAT</b>a x<b>2</b><br>
-	 * <tt>0x34 func addr1 addr2</tt><br>
-	 * <tt>func($addr1, $addr2)</tt>
+	 * <code>0x34 func addr1 addr2</code><br>
+	 * <code>func($addr1, $addr2)</code>
 	 */
 	EXT_FUN_DAT_2(0x34, OpCodeParam.FUNC, OpCodeParam.SRC_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
@@ -765,8 +781,8 @@ public enum OpCode {
 	},
 	/**
 	 * Call <b>EXT</b>ernal <b>FUN</b>ction expecting <b>RET</b>urn value<br>
-	 * <tt>0x35 func addr</tt><br>
-	 * <tt>@addr = func()</tt>
+	 * <code>0x35 func addr</code><br>
+	 * <code>@addr = func()</code>
 	 */
 	EXT_FUN_RET(0x35, OpCodeParam.FUNC, OpCodeParam.DEST_ADDR) {
 		@Override
@@ -801,8 +817,8 @@ public enum OpCode {
 	},
 	/**
 	 * Call <b>EXT</b>ernal <b>FUN</b>ction expecting <b>RET</b>urn value with <b>DAT</b>a<br>
-	 * <tt>0x36 func addr1 addr2</tt><br>
-	 * <tt>@addr1 = func($addr2)</tt>
+	 * <code>0x36 func addr1 addr2</code><br>
+	 * <code>@addr1 = func($addr2)</code>
 	 */
 	EXT_FUN_RET_DAT(0x36, OpCodeParam.FUNC, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
@@ -839,8 +855,8 @@ public enum OpCode {
 	},
 	/**
 	 * Call <b>EXT</b>ernal <b>FUN</b>ction expecting <b>RET</b>urn value with <b>DAT</b>a x<b>2</b><br>
-	 * <tt>0x37 func addr1 addr2 addr3</tt><br>
-	 * <tt>@addr1 = func($addr2, $addr3)</tt>
+	 * <code>0x37 func addr1 addr2 addr3</code><br>
+	 * <code>@addr1 = func($addr2, $addr3)</code>
 	 */
 	EXT_FUN_RET_DAT_2(0x37, OpCodeParam.FUNC, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
@@ -878,9 +894,40 @@ public enum OpCode {
 		}
 	},
 	/**
+	 * Call <b>EXT</b>ernal <b>FUN</b>ction with <b>VAL</b>ue<br>
+	 * <code>0x38 func value</code><br>
+	 * <code>func(value)</code>
+	 */
+	EXT_FUN_VAL(0x38, OpCodeParam.FUNC, OpCodeParam.VALUE) {
+		@Override
+		protected void preExecuteCheck(Object... args) throws ExecutionException {
+			short rawFunctionCode = (short) args[0];
+
+			FunctionCode functionCode = FunctionCode.valueOf(rawFunctionCode);
+
+			if (functionCode == null)
+				throw new IllegalFunctionCodeException(String.format("Unknown function code 0x%04x encountered at %s",
+						rawFunctionCode, this.name()));
+
+			functionCode.preExecuteCheck(1, false);
+		}
+
+		@Override
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+			short rawFunctionCode = (short) args[0];
+			long value = (long) args[1];
+
+			FunctionCode functionCode = FunctionCode.valueOf(rawFunctionCode);
+
+			FunctionData functionData = new FunctionData(value, false);
+
+			functionCode.execute(functionData, state, rawFunctionCode);
+		}
+	},
+	/**
 	 * <b>ADD</b> <b>VAL</b>ue<br>
-	 * <tt>0x46 addr1 value</tt><br>
-	 * <tt>@addr1 += value</tt>
+	 * <code>0x46 addr1 value</code><br>
+	 * <code>@addr1 += value</code>
 	 */
 	ADD_VAL(0x46, OpCodeParam.DEST_ADDR, OpCodeParam.VALUE) {
 		@Override
@@ -890,8 +937,8 @@ public enum OpCode {
 	},
 	/**
 	 * <b>SUB</b>tract <b>VAL</b>ue<br>
-	 * <tt>0x07 addr1 value</tt><br>
-	 * <tt>@addr1 -= value</tt>
+	 * <code>0x47 addr1 value</code><br>
+	 * <code>@addr1 -= value</code>
 	 */
 	SUB_VAL(0x47, OpCodeParam.DEST_ADDR, OpCodeParam.VALUE) {
 		@Override
@@ -901,8 +948,8 @@ public enum OpCode {
 	},
 	/**
 	 * <b>MUL</b>tiply <b>VAL</b>ue<br>
-	 * <tt>0x08 addr1 value</tt><br>
-	 * <tt>@addr1 *= value</tt>
+	 * <code>0x48 addr1 value</code><br>
+	 * <code>@addr1 *= value</code>
 	 */
 	MUL_VAL(0x48, OpCodeParam.DEST_ADDR, OpCodeParam.VALUE) {
 		@Override
@@ -912,9 +959,9 @@ public enum OpCode {
 	},
 	/**
 	 * <b>DIV</b>ide <b>VAL</b>ue<br>
-	 * <tt>0x09 addr1 value</tt><br>
-	 * <tt>@addr1 /= value</tt>
-	 * Can also throw <tt>IllegealOperationException</tt> if divide-by-zero attempted.
+	 * <code>0x49 addr1 value</code><br>
+	 * <code>@addr1 /= value</code>
+	 * Can also throw <code>IllegalOperationException</code> if divide-by-zero attempted.
 	 */
 	DIV_VAL(0x49, OpCodeParam.DEST_ADDR, OpCodeParam.VALUE) {
 		@Override
@@ -924,6 +971,35 @@ public enum OpCode {
 			} catch (ArithmeticException e) {
 				throw new IllegalOperationException("Divide by zero", e);
 			}
+		}
+	},
+	/**
+	 * <b>SH</b>ift <b>L</b>eft <b>VAL</b>ue<br>
+	 * <code>0x4a addr1 value</code><br>
+	 * <code>@addr1 &lt;&lt;= value</code>
+	 */
+	SHL_VAL(0x4a, OpCodeParam.DEST_ADDR, OpCodeParam.VALUE) {
+		private static final long MAX_SHIFT = MachineState.VALUE_SIZE * 8L;
+
+		@Override
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+			// If 2nd arg is more than value size (in bits) then return 0 to simulate all bits being shifted out of existence
+			executeValueOperation(state, (a, b) -> b >= MAX_SHIFT ? 0 : a << b, args);
+		}
+	},
+	/**
+	 * <b>SH</b>ift <b>R</b>ight <b>VAL</b>ue<br>
+	 * <code>0x4b addr1 value</code><br>
+	 * <code>@addr1 &gt;&gt;= value</code><br>
+	 * Note: new MSB bit will be zero
+	 */
+	SHR_VAL(0x4b, OpCodeParam.DEST_ADDR, OpCodeParam.VALUE) {
+		private static final long MAX_SHIFT = MachineState.VALUE_SIZE * 8L;
+
+		@Override
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+			// If 2nd arg is more than value size (in bits) then return 0 to simulate all bits being shifted out of existence
+			executeValueOperation(state, (a, b) -> b >= MAX_SHIFT ? 0 : a >>> b, args);
 		}
 	};
 
@@ -945,14 +1021,14 @@ public enum OpCode {
 	/**
 	 * Execute OpCode with args fetched from code bytes
 	 * <p>
-	 * Assumes <tt>codeByteBuffer.position()</tt> is already placed immediately after opcode and params.<br>
-	 * <tt>state.getProgramCounter()</tt> is available to return position immediately before opcode and params.
+	 * Assumes <code>codeByteBuffer.position()</code> is already placed immediately after opcode and params.<br>
+	 * <code>state.getProgramCounter()</code> is available to return position immediately before opcode and params.
 	 * <p>
-	 * OpCode execution can modify <tt>codeByteBuffer.position()</tt> in cases like jumps, branches, etc.
+	 * OpCode execution can modify <code>codeByteBuffer.position()</code> in cases like jumps, branches, etc.
 	 * <p>
-	 * Can also modify <tt>userStackByteBuffer</tt> and various fields of <tt>state</tt>.
+	 * Can also modify <code>userStackByteBuffer</code> and various fields of <code>state</code>.
 	 * <p>
-	 * Throws a subclass of <tt>ExecutionException</tt> on error, e.g. <tt>InvalidAddressException</tt>.
+	 * Throws a subclass of <code>ExecutionException</code> on error, e.g. <code>InvalidAddressException</code>.
 	 * 
 	 * @param state
 	 * @param args
@@ -978,11 +1054,18 @@ public enum OpCode {
 		this.executeWithParams(state, argsArray);
 	}
 
-	public static int calcOffset(ByteBuffer byteBuffer, Integer branchTarget) {
+	public static int calcOffset(ByteBuffer byteBuffer, Integer branchTarget) throws CompilationException {
+		// First-pass of compilation where we don't know branchTarget yet
 		if (branchTarget == null)
 			return 0;
 
-		return branchTarget - byteBuffer.position();
+		int offset = branchTarget - byteBuffer.position();
+
+		// Bounds checking
+		if (offset < Byte.MIN_VALUE || offset > Byte.MAX_VALUE)
+			throw new CompilationException(String.format("Branch offset %02x (from PC %04x) is wider than a byte", offset, byteBuffer.position()));
+
+		return offset;
 	}
 
 	public byte[] compile(Object... args) throws CompilationException {
@@ -1032,10 +1115,10 @@ public enum OpCode {
 	/**
 	 * Common code for ADD_DAT/SUB_DAT/MUL_DAT/DIV_DAT/MOD_DAT/SHL_DAT/SHR_DAT
 	 * 
-	 * @param codeByteBuffer
-	 * @param dataByteBuffer
+	 * @param state
 	 * @param operator
-	 *            - typically a lambda operating on two <tt>long</tt> params, e.g. <tt>(a, b) -> a + b</tt>
+	 *            - typically a lambda operating on two <code>long</code> params, e.g. <code>(a, b) &rarr; a + b</code>
+	 * @param args
 	 * @throws ExecutionException
 	 */
 	protected void executeDataOperation(MachineState state, TwoValueOperator operator, Object... args) throws ExecutionException {
@@ -1052,11 +1135,11 @@ public enum OpCode {
 
 	/**
 	 * Common code for ADD_VAL/SUB_VAL/MUL_VAL/DIV_VAL/MOD_VAL/SHL_VAL/SHR_VAL
-	 * 
-	 * @param codeByteBuffer
-	 * @param dataByteBuffer
+	 *
+	 * @param state
 	 * @param operator
-	 *            - typically a lambda operating on two <tt>long</tt> params, e.g. <tt>(a, b) -> a + b</tt>
+	 *            - typically a lambda operating on two <code>long</code> params, e.g. <code>(a, b) &rarr; a + b</code>
+	 * @param args
 	 * @throws ExecutionException
 	 */
 	protected void executeValueOperation(MachineState state, TwoValueOperator operator, Object... args) throws ExecutionException {
@@ -1073,11 +1156,10 @@ public enum OpCode {
 	/**
 	 * Common code for BGT/BLT/BGE/BLE/BEQ/BNE
 	 * 
-	 * @param codeByteBuffer
-	 * @param dataByteBuffer
 	 * @param state
 	 * @param comparator
-	 *            - typically a lambda comparing two <tt>long</tt> params, e.g. <tt>(a, b) -> a == b</tt>
+	 *            - typically a lambda comparing two <code>long</code> params, e.g. <code>(a, b) &rarr; a == b</code>
+	 * @param args
 	 * @throws ExecutionException
 	 */
 	protected void executeBranchConditional(MachineState state, TwoValueComparator comparator, Object... args) throws ExecutionException {

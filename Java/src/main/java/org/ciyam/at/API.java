@@ -76,8 +76,8 @@ public abstract class API {
 	 * <p>
 	 * AT should sleep so it can use next block as source of entropy.
 	 * <p>
-	 * Set <tt>state.isSleeping = true</tt> before exit on first call.<br>
-	 * <tt>state.steps</tt> will be zero on second call after wake-up.
+	 * Set <code>state.isSleeping = true</code> before exit on first call.<br>
+	 * <code>state.steps</code> will be zero on second call after wake-up.
 	 * <p>
 	 * Returns 0xffffffffffffffff if A not valid transaction.
 	 */
@@ -102,9 +102,9 @@ public abstract class API {
 	public abstract void messageAToB(MachineState state);
 
 	/**
-	 * Returns <tt>minutes</tt> of blocks added to 'timestamp'
+	 * Returns <code>minutes</code> of blocks added to 'timestamp'
 	 * <p>
-	 * <tt>minutes</tt> is converted to rough number of blocks and added to 'timestamp' to create return value.
+	 * <code>minutes</code> is converted to rough number of blocks and added to 'timestamp' to create return value.
 	 */
 	public abstract long addMinutesToTimestamp(Timestamp timestamp, long minutes, MachineState state);
 
@@ -113,7 +113,7 @@ public abstract class API {
 	 * 
 	 * @param amount
 	 *            - final balance to be returned to creator
-	 * @param state
+	 * @param state AT machine state
 	 */
 	public abstract void onFinished(long amount, MachineState state);
 

@@ -145,6 +145,33 @@ public class CompileTests {
 		assertTrue(Arrays.equals(expectedBytes, actualBytes));
 	}
 
+	@Test
+	public void testTwoPassBranchCompileFailure() throws CompilationException {
+		int addrData = 0;
+		Integer actualTarget = null;
+		int expectedTarget = 0x06;
+
+		// Old version
+		codeByteBuffer.put(OpCode.BZR_DAT.value).putInt(addrData).put((byte) expectedTarget);
+
+		// Two-pass version
+		ByteBuffer compileBuffer = ByteBuffer.allocate(512);
+		for (int pass = 0; pass < 2; ++pass) {
+			compileBuffer.clear();
+
+			try {
+				compileBuffer.put(OpCode.BZR_DAT.compile(addrData, calcOffset(compileBuffer, actualTarget)));
+			} catch (CompilationException e) {
+				// expected
+				return;
+			}
+
+			actualTarget = compileBuffer.position() + 333; // wider than a signed byte
+		}
+
+		fail("CompilationException should have been thrown");
+	}
+
 	@SuppressWarnings("unused")
 	@Test
 	public void testComplexCompile() throws CompilationException {
