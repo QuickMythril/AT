@@ -19,7 +19,7 @@ import org.ciyam.at.Timestamp;
 public class TestAPI extends API {
 
 	/** Average period between blocks, in seconds. */
-	public static final int BLOCK_PERIOD = 10 * 60;
+	public static final int BLOCK_PERIOD = 60;
 	/** Maximum number of steps before auto-sleep. */
 	public static final int MAX_STEPS_PER_ROUND = 500;
 	/** Op-code step multiplier for calling functions. */
@@ -102,29 +102,27 @@ public class TestAPI extends API {
 		}
 	}
 
-	public List<TestBlock> blockchain;
-	public Map<String, TestAccount> accounts;
-	public Map<String, TestTransaction> transactions;
+	public List<TestBlock> blockchain = new ArrayList<>();
+	public Map<String, TestAccount> accounts = new HashMap<>();
+	public Map<String, TestTransaction> transactions = new HashMap<>();
+	public List<TestTransaction> atTransactions = new ArrayList<>();
 
+	private TestBlock currentBlock = new TestBlock();
 	private int currentBlockHeight;
 
 	public TestAPI() {
 		this.currentBlockHeight = DEFAULT_INITIAL_BLOCK_HEIGHT;
 
 		// Fill block chain from block 1 to initial height with empty blocks
-		blockchain = new ArrayList<>();
 		for (int h = 1; h <= this.currentBlockHeight; ++h)
 			blockchain.add(new TestBlock());
 
 		// Set up test accounts
-		accounts = new HashMap<>();
 		new TestAccount(AT_CREATOR_ADDRESS, 1000000L).addToMap(accounts);
 		new TestAccount(AT_ADDRESS, DEFAULT_INITIAL_BALANCE).addToMap(accounts);
 		new TestAccount("Initiator", 100000L).addToMap(accounts);
 		new TestAccount("Responder", 200000L).addToMap(accounts);
 		new TestAccount("Bystander", 300000L).addToMap(accounts);
-
-		transactions = new HashMap<>();
 	}
 
 	public static byte[] encodeAddress(String address) {
@@ -153,6 +151,15 @@ public class TestAPI extends API {
 		this.currentBlockHeight = blockHeight;
 	}
 
+	public void addTransactionToCurrentBlock(TestTransaction testTransaction) {
+		currentBlock.transactions.add(testTransaction);
+	}
+
+	public void addCurrentBlockToChain() {
+		addBlockToChain(currentBlock);
+		currentBlock = new TestBlock();
+	}
+
 	public TestBlock addBlockToChain(TestBlock newBlock) {
 		blockchain.add(newBlock);
 		final int blockHeight = blockchain.size();
@@ -165,6 +172,10 @@ public class TestAPI extends API {
 
 			// Add to transactions map
 			transactions.put(stringifyHash(transaction.txHash), transaction);
+
+			// Transaction sent/received by AT? Add to AT transactions list
+			if (transaction.sender.equals(AT_ADDRESS) || transaction.recipient.equals(AT_ADDRESS))
+				atTransactions.add(transaction);
 		}
 
 		return newBlock;
@@ -288,7 +299,11 @@ public class TestAPI extends API {
 
 			if (transaction.recipient.equals("AT")) {
 				// Found a transaction
-				System.out.println("Found transaction at height " + blockHeight + " sequence " + transactionSequence);
+				System.out.println(String.format("Found transaction at height %d, sequence %d: %s from %s",
+						blockHeight,
+						transactionSequence,
+						transaction.txType.name(),
+						transaction.sender));
 
 				// Generate pseudo-hash of transaction
 				this.setA(state, transaction.txHash);
@@ -392,12 +407,29 @@ public class TestAPI extends API {
 		if (recipient == null)
 			throw new IllegalStateException("Refusing to pay to unknown account: " + address);
 
+		if (amount < 0)
+			throw new IllegalStateException(String.format("Refusing to pay negative amount: %s", amount));
+
+		if (amount == 0) {
+			System.out.println(String.format("Skipping zero-amount payment to account %s", address));
+			return;
+		}
+
 		recipient.balance += amount;
 		System.out.println(String.format("Paid %s to '%s', their balance now: %s", prettyAmount(amount), recipient.address, prettyAmount(recipient.balance)));
 
 		final long previousBalance = state.getCurrentBalance();
 		final long newBalance = previousBalance - amount;
 		System.out.println(String.format("AT balance was %s, now: %s", prettyAmount(previousBalance), prettyAmount(newBalance)));
+
+		// Add suitable transaction to currentBlock
+
+		// Generate tx hash
+		byte[] txHash = new byte[32];
+		RANDOM.nextBytes(txHash);
+
+		TestTransaction testTransaction = new TestTransaction(txHash, AT_ADDRESS, recipient.address, amount);
+		addTransactionToCurrentBlock(testTransaction);
 	}
 
 	@Override
@@ -409,7 +441,17 @@ public class TestAPI extends API {
 		if (recipient == null)
 			throw new IllegalStateException("Refusing to send message to unknown account: " + address);
 
-		recipient.messages.add(this.getA(state));
+		byte[] message = this.getA(state);
+		recipient.messages.add(message);
+
+		// Add suitable transaction to currentBlock
+
+		// Generate tx hash
+		byte[] txHash = new byte[32];
+		RANDOM.nextBytes(txHash);
+
+		TestTransaction testTransaction = new TestTransaction(txHash, AT_ADDRESS, recipient.address, message);
+		addTransactionToCurrentBlock(testTransaction);
 	}
 
 	@Override

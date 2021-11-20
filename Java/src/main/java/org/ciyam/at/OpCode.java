@@ -1070,7 +1070,11 @@ public enum OpCode {
 
 	public byte[] compile(Object... args) throws CompilationException {
 		if (args.length != this.params.length)
-			throw new IllegalArgumentException(String.format("%s requires %d args, only %d passed", this.name(), this.params.length, args.length));
+			throw new IllegalArgumentException(String.format("%s requires %d arg%s, but %d passed",
+					this.name(),
+					this.params.length,
+					this.params.length != 1 ? "s" : "",
+					args.length));
 
 		ByteBuffer byteBuffer = ByteBuffer.allocate(32); // 32 should easily be enough
 

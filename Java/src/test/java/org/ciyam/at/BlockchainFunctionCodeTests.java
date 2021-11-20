@@ -86,13 +86,27 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 
 	@Test
 	public void testPutPreviousBlockHashIntoA() throws ExecutionException {
-		int previousBlockHeight = TestAPI.DEFAULT_INITIAL_BLOCK_HEIGHT - 1;
+		// Generate some blocks containing transactions (but none to AT)
+		TestBlock newBlock = api.generateBlockWithNonAtTransactions();
+		api.addBlockToChain(newBlock);
+		api.bumpCurrentBlockHeight();
+
+		newBlock = api.generateBlockWithNonAtTransactions();
+		api.addBlockToChain(newBlock);
+		api.bumpCurrentBlockHeight();
+
+		// Generate a block containing transaction to AT
+		newBlock = api.generateBlockWithAtTransaction();
+		api.addBlockToChain(newBlock);
+		int previousBlockHeight = api.getCurrentBlockHeight();
+		api.bumpCurrentBlockHeight();
 
 		codeByteBuffer.put(OpCode.EXT_FUN.value).putShort(FunctionCode.PUT_PREVIOUS_BLOCK_HASH_INTO_A.value);
 		codeByteBuffer.put(OpCode.FIN_IMD.value);
 
 		execute(true);
 
+		// previousBlockHeight - 1 because index into blockchain starts at 0, whereas block heights start at 1
 		byte[] expectedBlockHash = api.blockchain.get(previousBlockHeight - 1).blockHash;
 
 		byte[] aBytes = api.getA(state);

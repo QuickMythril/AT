@@ -96,6 +96,9 @@ public abstract class ExecutableTest {
 			System.out.println("New balance: " + TestAPI.prettyAmount(newBalance));
 			api.setCurrentBalance(newBalance);
 
+			// Add block, possibly containing AT-created transactions, to chain to at least provide block hashes
+			api.addCurrentBlockToChain();
+
 			// Bump block height
 			api.bumpCurrentBlockHeight();
 
