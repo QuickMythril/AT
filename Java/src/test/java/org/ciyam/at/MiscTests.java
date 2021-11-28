@@ -35,18 +35,55 @@ public class MiscTests extends ExecutableTest {
 
 	@Test
 	public void testFreeze() throws ExecutionException {
+		// Choose initial balance so it used up before max-steps-per-round triggers
+		long initialBalance = 5L;
+		api.accounts.get(TestAPI.AT_ADDRESS).balance = initialBalance;
+
 		// Infinite loop
 		codeByteBuffer.put(OpCode.JMP_ADR.value).putInt(0);
 
-		// We need enough rounds to exhaust balance
-		long minRounds = TestAPI.DEFAULT_INITIAL_BALANCE / TestAPI.MAX_STEPS_PER_ROUND + 1;
-		for (long i = 0; i < minRounds; ++i)
+		// Test a few rounds to make sure AT is frozen and stays frozen
+		for (int i = 0; i < 3; ++i) {
 			execute(true);
+
+			assertTrue(state.isFrozen());
+
+			Long frozenBalance = state.getFrozenBalance();
+			assertNotNull(frozenBalance);
+		}
+	}
+
+	@Test
+	public void testUnfreeze() throws ExecutionException {
+		// Choose initial balance so it used up before max-steps-per-round triggers
+		long initialBalance = 5L;
+		api.setCurrentBalance(initialBalance);
+
+		// Infinite loop
+		codeByteBuffer.put(OpCode.JMP_ADR.value).putInt(0);
+
+		// Execute to make sure AT is frozen and stays frozen
+		execute(true);
 
 		assertTrue(state.isFrozen());
 
 		Long frozenBalance = state.getFrozenBalance();
 		assertNotNull(frozenBalance);
+
+		// Send payment to AT to allow unfreezing
+		// Payment needs to be enough to trigger max-steps-per-round so we can detect unfreezing
+		api.setCurrentBalance(TestAPI.MAX_STEPS_PER_ROUND * api.getFeePerStep() * 2);
+
+		// Execute AT
+		execute(true);
+
+		// We expect AT to be sleeping, not frozen
+		assertFalse(state.isFrozen());
+
+		frozenBalance = state.getFrozenBalance();
+		assertNull(frozenBalance);
+
+		assertTrue(state.isSleeping());
 	}
 
 	@Test

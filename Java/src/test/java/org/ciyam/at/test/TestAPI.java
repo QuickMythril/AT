@@ -26,7 +26,7 @@ public class TestAPI extends API {
 	public static final int STEPS_PER_FUNCTION_CALL = 10;
 
 	/** Initial balance for simple test scenarios. */
-	public static final long DEFAULT_INITIAL_BALANCE = 1234L;
+	public static final long DEFAULT_INITIAL_BALANCE = 10_0000_0000L;
 	/** Initial block height for simple test scenarios. */
 	public static final int DEFAULT_INITIAL_BLOCK_HEIGHT = 10;
 	/** AT creation block height for simple test scenarios. */
@@ -118,11 +118,20 @@ public class TestAPI extends API {
 			blockchain.add(new TestBlock());
 
 		// Set up test accounts
-		new TestAccount(AT_CREATOR_ADDRESS, 1000000L).addToMap(accounts);
+		new TestAccount(AT_CREATOR_ADDRESS, DEFAULT_INITIAL_BALANCE).addToMap(accounts);
 		new TestAccount(AT_ADDRESS, DEFAULT_INITIAL_BALANCE).addToMap(accounts);
-		new TestAccount("Initiator", 100000L).addToMap(accounts);
-		new TestAccount("Responder", 200000L).addToMap(accounts);
-		new TestAccount("Bystander", 300000L).addToMap(accounts);
+		new TestAccount("Initiator", DEFAULT_INITIAL_BALANCE * 2).addToMap(accounts);
+		new TestAccount("Responder", DEFAULT_INITIAL_BALANCE * 3).addToMap(accounts);
+		new TestAccount("Bystander", DEFAULT_INITIAL_BALANCE * 4).addToMap(accounts);
+	}
+
+	// Hook to be overridden
+	protected boolean willExecute(MachineState state, int blockHeight) {
+		return true;
+	}
+
+	// Hook to be oveerridden
+	protected void preExecute(MachineState state) {
 	}
 
 	public static byte[] encodeAddress(String address) {
@@ -163,6 +172,7 @@ public class TestAPI extends API {
 	public TestBlock addBlockToChain(TestBlock newBlock) {
 		blockchain.add(newBlock);
 		final int blockHeight = blockchain.size();
+		StringBuilder sb = new StringBuilder(256);
 
 		for (int seq = 0; seq < newBlock.transactions.size(); ++seq) {
 			TestTransaction transaction = newBlock.transactions.get(seq);
@@ -176,6 +186,44 @@ public class TestAPI extends API {
 			// Transaction sent/received by AT? Add to AT transactions list
 			if (transaction.sender.equals(AT_ADDRESS) || transaction.recipient.equals(AT_ADDRESS))
 				atTransactions.add(transaction);
+
+			// Process PAYMENT transactions
+			if (transaction.txType == ATTransactionType.PAYMENT) {
+				sb.setLength(0);
+				sb.append(transaction.sender)
+						.append(" sent ")
+						.append(prettyAmount(transaction.amount));
+
+				// Subtract amount from sender
+				TestAccount senderAccount = accounts.get(transaction.sender);
+				if (senderAccount == null)
+					throw new IllegalStateException(String.format("Can't send from unknown sender %s: no funds!",
+							transaction.sender));
+
+				// Do not apply if sender is AT because balance update already performed during execution
+				if (!transaction.sender.equals(AT_ADDRESS)) {
+					senderAccount.balance -= transaction.amount;
+				}
+
+				if (senderAccount.balance < 0)
+					throw new IllegalStateException(String.format("Can't send %s from %s: insufficient funds (%s)",
+							prettyAmount(transaction.amount),
+							transaction.sender,
+							prettyAmount(senderAccount.balance)));
+
+				// Add amount to recipient
+				sb.append(" to ");
+				TestAccount recipientAccount = accounts.get(transaction.recipient);
+				if (recipientAccount == null) {
+					sb.append("(new) ");
+					recipientAccount = new TestAccount(transaction.recipient, 0);
+					accounts.put(transaction.recipient, recipientAccount);
+				}
+				recipientAccount.balance += transaction.amount;
+				sb.append(transaction.recipient);
+
+				System.out.println(sb.toString());
+			}
 		}
 
 		return newBlock;
@@ -299,11 +347,13 @@ public class TestAPI extends API {
 
 			if (transaction.recipient.equals("AT")) {
 				// Found a transaction
-				System.out.println(String.format("Found transaction at height %d, sequence %d: %s from %s",
+				System.out.println(String.format("Found transaction at height %d, sequence %d: %s %s from %s",
 						blockHeight,
 						transactionSequence,
+						transaction.txType.equals(ATTransactionType.PAYMENT) ? prettyAmount(transaction.amount) : "",
 						transaction.txType.name(),
-						transaction.sender));
+						transaction.sender
+				));
 
 				// Generate pseudo-hash of transaction
 				this.setA(state, transaction.txHash);
@@ -415,12 +465,11 @@ public class TestAPI extends API {
 			return;
 		}
 
-		recipient.balance += amount;
-		System.out.println(String.format("Paid %s to '%s', their balance now: %s", prettyAmount(amount), recipient.address, prettyAmount(recipient.balance)));
+		System.out.println(String.format("Creating PAYMENT of %s to %s", prettyAmount(amount), recipient.address));
 
 		final long previousBalance = state.getCurrentBalance();
 		final long newBalance = previousBalance - amount;
-		System.out.println(String.format("AT balance was %s, now: %s", prettyAmount(previousBalance), prettyAmount(newBalance)));
+		System.out.println(String.format("AT current balance was %s, now: %s", prettyAmount(previousBalance), prettyAmount(newBalance)));
 
 		// Add suitable transaction to currentBlock
 
@@ -465,10 +514,16 @@ public class TestAPI extends API {
 		System.out.println("Finished - refunding remaining to creator");
 
 		TestAccount atCreatorAccount = accounts.get(AT_CREATOR_ADDRESS);
-		atCreatorAccount.balance += amount;
-		System.out.println(String.format("Paid %s to AT creator '%s', their balance now: %s", prettyAmount(amount), atCreatorAccount.address, prettyAmount(atCreatorAccount.balance)));
+		System.out.println(String.format("Creating PAYMENT of %s to AT creator %s", prettyAmount(amount), atCreatorAccount.address));
 
-		accounts.get(AT_ADDRESS).balance -= amount;
+		// Add suitable transaction to currentBlock
+
+		// Generate tx hash
+		byte[] txHash = new byte[32];
+		RANDOM.nextBytes(txHash);
+
+		TestTransaction testTransaction = new TestTransaction(txHash, AT_ADDRESS, atCreatorAccount.address, amount);
+		addTransactionToCurrentBlock(testTransaction);
 	}
 
 	@Override
