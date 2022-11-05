@@ -561,7 +561,7 @@ public enum OpCode {
 	/**
 	 * <b>SL</b>ee<b>P</b> until <b>DAT</b>a<br>
 	 * <code>0x25 addr</code><br>
-	 * <code>sleep until $addr, then carry on from current PC</code><br>
+	 * Sleep until <code>$addr</code>, then carry on from current <code>PC</code><br>
 	 * Note: The value from <code>$addr</code> is considered to be a block height.
 	 */
 	SLP_DAT(0x25, OpCodeParam.BLOCK_HEIGHT) {
@@ -634,7 +634,7 @@ public enum OpCode {
 	/**
 	 * <b>SL</b>ee<b>P</b> <b>IM</b>me<b>D</b>iately<br>
 	 * <code>0x2a</code><br>
-	 * <code>sleep until next block, then carry on from current PC</code>
+	 * Sleep until next block, then carry on from current <code>PC</code>
 	 */
 	SLP_IMD(0x2a) {
 		@Override
@@ -659,8 +659,7 @@ public enum OpCode {
 	/**
 	 * <b>SL</b>ee<b>P</b> for <b>VAL</b>ue blocks<br>
 	 * <code>0x2c value</code><br>
-	 * <code>sleep until $addr, then carry on from current PC</code><br>
-	 * Note: The value from <code>$addr</code> is considered to be a block height.
+	 * Sleep for <code>value</code> blocks, then carry on from current <code>PC</code>
 	 */
 	SLP_VAL(0x2c, OpCodeParam.VALUE) {
 		@Override
@@ -1070,7 +1069,11 @@ public enum OpCode {
 
 	public byte[] compile(Object... args) throws CompilationException {
 		if (args.length != this.params.length)
-			throw new IllegalArgumentException(String.format("%s requires %d args, only %d passed", this.name(), this.params.length, args.length));
+			throw new IllegalArgumentException(String.format("%s requires %d arg%s, but %d passed",
+					this.name(),
+					this.params.length,
+					this.params.length != 1 ? "s" : "",
+					args.length));
 
 		ByteBuffer byteBuffer = ByteBuffer.allocate(32); // 32 should easily be enough
 

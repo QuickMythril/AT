@@ -4,17 +4,18 @@ import java.nio.ByteBuffer;
 import java.security.Security;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.ciyam.at.AtLoggerFactory;
 import org.ciyam.at.MachineState;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
-public abstract class ExecutableTest {
+public class ExecutableTest {
 
-	private static final int DATA_OFFSET = MachineState.HEADER_LENGTH; // code bytes are not present
-	private static final int CALL_STACK_OFFSET = DATA_OFFSET + TestUtils.NUM_DATA_PAGES * MachineState.VALUE_SIZE;
+	public static final int DATA_OFFSET = MachineState.HEADER_LENGTH; // code bytes are not present
+	public static final int CALL_STACK_OFFSET = DATA_OFFSET + TestUtils.NUM_DATA_PAGES * MachineState.VALUE_SIZE;
 
-	public TestLoggerFactory loggerFactory;
+	public AtLoggerFactory loggerFactory;
 	public TestAPI api;
 	public MachineState state;
 	public ByteBuffer codeByteBuffer;
@@ -24,6 +25,7 @@ public abstract class ExecutableTest {
 	public int userStackOffset;
 	public int userStackSize;
 	public byte[] packedState;
+	public byte[] codeBytes;
 
 	@BeforeClass
 	public static void beforeClass() {
@@ -50,28 +52,39 @@ public abstract class ExecutableTest {
 		loggerFactory = null;
 	}
 
-	protected void execute(boolean onceOnly) {
-		byte[] headerBytes = TestUtils.HEADER_BYTES;
-		byte[] codeBytes = codeByteBuffer.array();
-		byte[] dataBytes = dataByteBuffer.array();
-
+	public void execute(boolean onceOnly) {
 		if (packedState == null) {
 			// First time
 			System.out.println("First execution - deploying...");
+			byte[] headerBytes = TestUtils.HEADER_BYTES;
+			codeBytes = codeByteBuffer.array();
+			byte[] dataBytes = dataByteBuffer.array();
+
 			state = new MachineState(api, loggerFactory, headerBytes, codeBytes, dataBytes);
 			packedState = state.toBytes();
 		}
 
 		do {
-			state = MachineState.fromBytes(api, loggerFactory, packedState, codeBytes);
+			execute_once();
+		} while (!onceOnly && !state.isFinished());
 
-			System.out.println("Starting execution round!");
-			System.out.println("Current block height: " + api.getCurrentBlockHeight());
-			System.out.println("Previous balance: " + TestAPI.prettyAmount(state.getPreviousBalance()));
-			System.out.println("Current balance: " + TestAPI.prettyAmount(state.getCurrentBalance()));
+		unwrapState(state);
+	}
 
+	public void execute_once() {
+		state = MachineState.fromBytes(api, loggerFactory, packedState, codeBytes);
+
+		System.out.println("Starting execution round!");
+		System.out.println("Current block height: " + api.getCurrentBlockHeight());
+		System.out.println("Previous balance: " + TestAPI.prettyAmount(state.getPreviousBalance()));
+		System.out.println("Current balance: " + TestAPI.prettyAmount(api.getCurrentBalance(state)));
+
+		// Actual execution
+		if (api.willExecute(state, api.getCurrentBlockHeight())) {
 			// Actual execution
+			api.preExecute(state);
 			state.execute();
+			packedState = state.toBytes();
 
 			System.out.println("After execution round:");
 			System.out.println("Steps: " + state.getSteps());
@@ -94,19 +107,23 @@ public abstract class ExecutableTest {
 
 			long newBalance = state.getCurrentBalance();
 			System.out.println("New balance: " + TestAPI.prettyAmount(newBalance));
+
+			// Update AT balance due to execution costs, etc.
 			api.setCurrentBalance(newBalance);
+		} else {
+			System.out.println("Skipped execution round");
+		}
 
-			// Bump block height
-			api.bumpCurrentBlockHeight();
+		// Add block, possibly containing AT-created transactions, to chain to at least provide block hashes
+		api.addCurrentBlockToChain();
 
-			packedState = state.toBytes();
-			System.out.println("Execution round finished\n");
-		} while (!onceOnly && !state.isFinished());
+		// Bump block height
+		api.bumpCurrentBlockHeight();
 
-		unwrapState(state);
+		System.out.println("Execution round finished\n");
 	}
 
-	protected byte[] unwrapState(MachineState state) {
+	public byte[] unwrapState(MachineState state) {
 		// Ready for diagnosis
 		byte[] stateBytes = state.toBytes();
 
@@ -121,30 +138,30 @@ public abstract class ExecutableTest {
 		return stateBytes;
 	}
 
-	protected long getData(int address) {
+	public long getData(int address) {
 		int index = DATA_OFFSET + address * MachineState.VALUE_SIZE;
 		return stateByteBuffer.getLong(index);
 	}
 
-	protected void getDataBytes(int address, byte[] dest) {
+	public void getDataBytes(int address, byte[] dest) {
 		int index = DATA_OFFSET + address * MachineState.VALUE_SIZE;
 		stateByteBuffer.slice().position(index).get(dest);
 	}
 
-	protected int getCallStackPosition() {
+	public int getCallStackPosition() {
 		return TestUtils.NUM_CALL_STACK_PAGES * MachineState.ADDRESS_SIZE - callStackSize;
 	}
 
-	protected int getCallStackEntry(int address) {
+	public int getCallStackEntry(int address) {
 		int index = CALL_STACK_OFFSET + 4 + address - TestUtils.NUM_CALL_STACK_PAGES * MachineState.ADDRESS_SIZE + callStackSize;
 		return stateByteBuffer.getInt(index);
 	}
 
-	protected int getUserStackPosition() {
+	public int getUserStackPosition() {
 		return TestUtils.NUM_USER_STACK_PAGES * MachineState.VALUE_SIZE - userStackSize;
 	}
 
-	protected long getUserStackEntry(int address) {
+	public long getUserStackEntry(int address) {
 		int index = userStackOffset + 4 + address - TestUtils.NUM_USER_STACK_PAGES * MachineState.VALUE_SIZE + userStackSize;
 		return stateByteBuffer.getLong(index);
 	}
